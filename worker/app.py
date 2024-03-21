@@ -1,3 +1,4 @@
+import time
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -9,6 +10,7 @@ def scrape():
         url = request_data['url']
         # TODO implement
         text = f"Scraped from {url}:\ndummy text"
+        time.sleep(10)
         return jsonify({"text": text}), 200
     else:
         return jsonify({"error": "URL not found in request body"}), 400
@@ -19,7 +21,8 @@ def scrape_soup():
     if 'url' in request_data:
         url = request_data['url']
         # TODO implement
-        soup = f"dummy bs4 soup converted to string"
+        time.sleep(10)
+        soup = f"Scraped from {url} dummy bs4 soup converted to string"
         return jsonify({"text": soup}), 200
     else:
         return jsonify({"error": "URL not found in request body"}), 400
