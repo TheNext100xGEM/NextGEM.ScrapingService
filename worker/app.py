@@ -5,7 +5,7 @@ from threading import Semaphore
 app = Flask(__name__)
 
 # Maximum number of concurrent requests
-LIMIT_REQUESTS = 5
+LIMIT_REQUESTS = 2
 
 # Semaphore to limit the number of concurrent requests
 semaphore = Semaphore(LIMIT_REQUESTS)
