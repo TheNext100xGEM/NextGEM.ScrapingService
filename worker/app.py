@@ -57,7 +57,7 @@ def scrape_soup():
             soup = get_soup(url, taskid, app.logger)
 
             app.logger.info(f'[{taskid}] Processing done')
-            return jsonify({"text": soup}), 200
+            return jsonify({"text": str(soup)}), 200
         else:
             app.logger.info(f'[{taskid}] Error: URL not found in request body')
             return jsonify({"error": "URL not found in request body"}), 400
