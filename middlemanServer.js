@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const app = express();
+const crypto = require('crypto')
 app.use(express.json());
 
 const LIMIT_REQUESTS = 2;
@@ -48,10 +49,11 @@ const processQueueForDomain = async (domainName, requestId)  => {
 
         const apiEndpoint = endpoint === 'scrape' ? 'http://localhost:3001/scrape' : 'http://localhost:3001/scrape_soup';
         try{
-           
+            res.send({ requestId })
             let response = await axios.post(apiEndpoint, { url })
+            console.log(response.data)
             pendingRequests[requestId].isFinished = true;
-            pendingRequests[requestId].html = response.data.html;
+            pendingRequests[requestId].html = response.data?.html;
             
             pendingRequests.timeout = setTimeout(() => { 
                 delete pendingRequests[requestId];
