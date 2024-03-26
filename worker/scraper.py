@@ -54,15 +54,15 @@ def soup_to_text(soup, taskid, logger):
     """ Extract text from bs4 soup """
     paragraphs = soup.find_all(text=True)
 
-    texts = [p.text for p in paragraphs if len(p.text) > 1]  # Filter short texts
+    texts = [p.text for p in paragraphs if (len(p.text) > 1) and (" " in p.text)]  # Filter short texts
 
     # Concat text segments
     if len(texts) > 1:
         texts = [texts[i] for i in range(1, len(texts) - 1) if texts[i] != texts[i + 1]]
     text = '\n'.join(texts)
 
-    if '404 Page Not Found' in text:
-        logger.info(f'[{taskid}] "404 Page Not Found" in text, returning empty string')
+    if 'page not found' in text.lower():
+        logger.info(f'[{taskid}] "Page Not Found" in text, returning empty string')
         return ''
     else:
         return text
@@ -85,7 +85,7 @@ def get_pdf_text(url: str, taskid: str, logger):
         logger.info(f'[{taskid}] PDF parsing success')
         pdf.close()  # Close the document object when done
     except Exception as e:
-        logger.info(f'[{taskid}] PDF parsing error: {e}')
+        logger.info(f'[{taskid}] PDF parsing error: {response} - {e}')
         return ""
     return text
 
