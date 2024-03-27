@@ -5,7 +5,7 @@ metadata:
   labels:
     name: worker
 spec:
-  replicas: 20
+  replicas: 30
   selector:
     matchLabels:
       app: worker
@@ -18,12 +18,12 @@ spec:
       - name: worker
         image: us-central1-docker.pkg.dev/nextgem-selenium/scraper/selenium-worker:v0.0.1
         ports:
-        - containerPort: 3000
+        - containerPort: 5000
         resources:
           requests:
-            memory: "128Mi"
-            cpu: "100m"
+            memory: "512Mi"
+            cpu: "0.5"
           limits:
-            memory: "128Mi"
-            cpu: "100m"
+            memory: "1Gi"
+            cpu: "1"
       restartPolicy: Always

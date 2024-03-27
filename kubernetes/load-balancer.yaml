@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: node
+  name: worker
   labels:
-    service: node
+    service: worker
 spec:
   selector:
-    app: node
+    app: worker
   type: LoadBalancer
   sessionAffinity: None
   ports:
-    - port: 3000
+    - port: 5000
