@@ -24,6 +24,9 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy the config file with secret keys into the container
+COPY config.json .
+
 # Copy the Flask app code into the container
 COPY app.py .
 
