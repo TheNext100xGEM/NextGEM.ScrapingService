@@ -34,7 +34,7 @@ COPY app.py .
 COPY scraper.py .
 
 # Expose the Flask app's port
-EXPOSE 5000
+EXPOSE 3000
 
 # Command to run the Flask app
 CMD ["python", "app.py"]
