@@ -56,17 +56,29 @@ const processQueueForDomain = async (domainName: string, requestId?: string): Pr
 
     console.log(`Processing ${url} for ${endpoint} in domain: ${domainName}`);
 
-    const apiEndpoint = endpoint === 'scrape' ? 'http://localhost:3001/scrape' : 'http://localhost:3001/scrape_soup';
+    let apiEndpoint: string;
+    switch (endpoint) {
+    case 'scrape':
+      apiEndpoint = 'http://34.68.89.147:5000/scrape';
+      break;
+    case 'scrape_soup':
+      apiEndpoint = 'http://34.68.89.147:5000/scrape_soup';
+      break;
+    default:
+      throw new Error('Invalid endpoint');
+    }
+
     try {
-      res.send({ requestId });
+      // res.send({ requestId });
       const response = await axios.post(apiEndpoint, { url });
-      console.log(response.data);
+      // console.log(response.data);
       pendingRequests[requestId!].isFinished = true;
       pendingRequests[requestId!].html = response.data?.html;
 
       pendingRequests[requestId!].timeout = setTimeout(() => {
         delete pendingRequests[requestId!];
       }, 60 * 1000 * 2);
+      res.send(response.data);
     } catch (error) {
       res.status(500).send('Error processing your request');
     }
