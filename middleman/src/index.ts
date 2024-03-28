@@ -1,10 +1,13 @@
 import express, { Request, Response } from 'express';
 import axios from 'axios';
 import * as crypto from 'crypto';
+import dotenv from 'dotenv';
 
 const app = express();
 app.use(express.json());
+dotenv.config();
 
+const API_BASE_URL = process.env.API_BASE_URL;
 const LIMIT_REQUESTS = 2;
 const domainQueues: {
   [domainName: string]: {
@@ -62,10 +65,10 @@ const processQueueForDomain = async (domainName: string, requestId?: string): Pr
 
       switch (endpoint) {
       case 'scrape':
-        apiEndpoint = 'http://34.68.89.147:5000/scrape';
+        apiEndpoint = `${process.env.API_BASE_URL}/scrape`;
         break;
       case 'scrape_soup':
-        apiEndpoint = 'http://34.68.89.147:5000/scrape_soup';
+        apiEndpoint = `${process.env.API_BASE_URL}/scrape_soup`;
         break;
       default:
         throw new Error('Invalid endpoint');
@@ -116,7 +119,7 @@ app.post('/scrape', async (req: Request, res: Response) => {
     // Send requests to scrape each URL concurrently
     await Promise.all(urls.map(async (url) => {
       try {
-        const response = await axios.post('http://34.68.89.147:5000/scrape', { url });
+        const response = await axios.post(`${process.env.API_BASE_URL}/scrape`, { url });
         results.push({ url, data: response.data });
       } catch (error) {
         results.push({ url, error: error.message });
@@ -141,7 +144,7 @@ app.post('/scrape_soup', async (req: Request, res: Response) => {
     // Send requests to scrape each URL concurrently
     await Promise.all(urls.map(async (url) => {
       try {
-        const response = await axios.post('http://34.68.89.147:5000/scrape_soup', { url });
+        const response = await axios.post(`${process.env.API_BASE_URL}/scrape_soup`, { url });
         results.push({ url, data: response.data });
       } catch (error) {
         results.push({ url, error: error.message });
