@@ -35,55 +35,60 @@ const randomHex = (length: number): string => {
   return randomBytes.toString('hex').slice(0, length);
 };
 
-function enqueueRequest(domainName: string, url: string, res: Response, endpoint: string): void {
+const enqueueRequest = async (domainName: string, url: string, res: Response, endpoint: string): Promise<string> => {
   const requestId = randomHex(48);
   if (!domainQueues[domainName]) {
     domainQueues[domainName] = { activeRequests: 0, queue: [] };
   }
-
   pendingRequests[requestId] = { url, isFinished: false, html: '' };
   domainQueues[domainName].queue.push({ url, res, endpoint });
-  processQueueForDomain(domainName, requestId);
-}
+  const response = await processQueueForDomain(domainName, requestId);
+  return response;
+};
 
-const processQueueForDomain = async (domainName: string, requestId?: string): Promise<void> => {
+const processQueueForDomain = async (domainName: string, requestId?: string): Promise<string> => {
   const domainQueue = domainQueues[domainName];
   if (!domainQueue) return;
 
   if (domainQueue.activeRequests < LIMIT_REQUESTS && domainQueue.queue.length > 0) {
-    const { url, res, endpoint } = domainQueue.queue.shift()!;
-    domainQueue.activeRequests++;
+    const shiftedElement = domainQueue.queue.shift();
+    if (shiftedElement) {
+      const { url, res, endpoint } = shiftedElement;
+      domainQueue.activeRequests++;
 
-    console.log(`Processing ${url} for ${endpoint} in domain: ${domainName}`);
+      console.log(`Processing ${url} for ${endpoint} in domain: ${domainName}`);
 
-    let apiEndpoint: string;
-    switch (endpoint) {
-    case 'scrape':
-      apiEndpoint = 'http://34.68.89.147:5000/scrape';
-      break;
-    case 'scrape_soup':
-      apiEndpoint = 'http://34.68.89.147:5000/scrape_soup';
-      break;
-    default:
-      throw new Error('Invalid endpoint');
+      let apiEndpoint: string;
+
+      switch (endpoint) {
+      case 'scrape':
+        apiEndpoint = 'http://34.68.89.147:5000/scrape';
+        break;
+      case 'scrape_soup':
+        apiEndpoint = 'http://34.68.89.147:5000/scrape_soup';
+        break;
+      default:
+        throw new Error('Invalid endpoint');
+      }
+
+      try {
+        // res.send({ requestId });
+        const response = await axios.post(apiEndpoint, { url });
+        // console.log(response.data);
+        pendingRequests[requestId!].isFinished = true;
+        pendingRequests[requestId!].html = response.data?.html;
+
+        pendingRequests[requestId!].timeout = setTimeout(() => {
+          delete pendingRequests[requestId!];
+        }, 60 * 1000 * 2);
+        return response.data.text;
+      } catch (error) {
+        res.status(500).send('Error processing your request');
+      }
+      domainQueue.activeRequests--;
+      processQueueForDomain(domainName);
     }
-
-    try {
-      // res.send({ requestId });
-      const response = await axios.post(apiEndpoint, { url });
-      // console.log(response.data);
-      pendingRequests[requestId!].isFinished = true;
-      pendingRequests[requestId!].html = response.data?.html;
-
-      pendingRequests[requestId!].timeout = setTimeout(() => {
-        delete pendingRequests[requestId!];
-      }, 60 * 1000 * 2);
-      res.send(response.data);
-    } catch (error) {
-      res.status(500).send('Error processing your request');
-    }
-    domainQueue.activeRequests--;
-    processQueueForDomain(domainName);
+    return;
   }
 };
 
@@ -99,25 +104,56 @@ app.get('/result/:requestId', (req: Request, res: Response) => {
   }
 });
 
-app.post('/scrape', (req: Request, res: Response) => {
-  const { url } = req.body;
-  const domainName = getDomainName(url);
-  if (domainName) {
-    enqueueRequest(domainName, url, res, 'scrape');
-  } else {
-    res.status(400).send('Invalid URL');
+app.post('/scrape', async (req: Request, res: Response) => {
+  try {
+    const urls: string[] = req.body.urls;
+
+    if (!urls || !Array.isArray(urls)) {
+      return res.status(400).json({ error: 'Invalid URLs array' });
+    }
+
+    const results: any[] = [];
+    // Send requests to scrape each URL concurrently
+    await Promise.all(urls.map(async (url) => {
+      try {
+        const response = await axios.post('http://34.68.89.147:5000/scrape', { url });
+        results.push({ url, data: response.data });
+      } catch (error) {
+        results.push({ url, error: error.message });
+      }
+    }));
+
+    res.json({ results });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
-app.post('/scrape_soup', (req: Request, res: Response) => {
-  const { url } = req.body;
-  const domainName = getDomainName(url);
-  if (domainName) {
-    enqueueRequest(domainName, url, res, 'scrape_soup');
-  } else {
-    res.status(400).send('Invalid URL');
+app.post('/scrape_soup', async (req: Request, res: Response) => {
+  try {
+    const urls: string[] = req.body.urls;
+
+    if (!urls || !Array.isArray(urls)) {
+      return res.status(400).json({ error: 'Invalid URLs array' });
+    }
+
+    const results: any[] = [];
+    // Send requests to scrape each URL concurrently
+    await Promise.all(urls.map(async (url) => {
+      try {
+        const response = await axios.post('http://34.68.89.147:5000/scrape_soup', { url });
+        results.push({ url, data: response.data });
+      } catch (error) {
+        results.push({ url, error: error.message });
+      }
+    }));
+
+    res.json({ results });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 app.listen(3000, () => {
   console.log('Server running on port 3000');
