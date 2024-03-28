@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: node
-        image: us-central1-docker.pkg.dev/nextgem-selenium/request-queue/middleman:v0.0.1
+        image: us-central1-docker.pkg.dev/nextgem-selenium/request-queue/middleman:v0.0.2
         ports:
         - containerPort: 3000
         resources:
