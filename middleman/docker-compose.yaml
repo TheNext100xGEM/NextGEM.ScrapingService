@@ -1,0 +1,14 @@
+version: '3'
+services:
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"  # Expose Redis port
+
+  nodejs-app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      REDIS_HOST: "redis" # Service name of Redis when running locally with Docker Compose
+      REDIS_PORT: 6379   # Redis default port
