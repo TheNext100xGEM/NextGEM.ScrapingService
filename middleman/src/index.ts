@@ -65,6 +65,6 @@ app.post('/scrape', async (req: Request, res: Response) => {
   }
 });
 
-app.listen(6000, () => {
+app.listen(3000, () => {
   console.log('Server running on port 3000');
 });
