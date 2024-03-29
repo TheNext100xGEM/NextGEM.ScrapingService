@@ -5,30 +5,29 @@ from selenium_stealth import stealth
 from bs4 import BeautifulSoup
 import fitz  # PyMuPDF
 
-
-# Start headless browser (stealthy as fuck)
-service = ChromeService()
-
-options = webdriver.ChromeOptions()
-options.add_argument("--headless")  # run in headless mode
-options.add_argument('--disable-blink-features=AutomationControlled')
-options.add_argument('--disable-popup-blocking')  # disable pop-up blocking
-options.add_argument('--start-maximized')  # start the browser window in maximized mode
-options.add_argument('--disable-extensions')  # disable extensions
-options.add_argument('--no-sandbox')  # disable sandbox mode
-options.add_argument('--disable-dev-shm-usage')  # disable shared memory usage
-
-driver = webdriver.Chrome(service=service, options=options)
-driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-
-# TODO: rotate user agent if needed (https://www.zenrows.com/blog/selenium-stealth#scrape-with-stealth)
-
-stealth(driver, languages=["en-US", "en"], vendor="Google Inc.", platform="Win32", webgl_vendor="Intel Inc.",
-        renderer="Intel Iris OpenGL Engine", fix_hairline=True)
-
-
 def get_soup(url: str, taskid: str, logger):
     """ Scraping with or without Selenium driver """
+    # Start headless browser (stealthy as fuck)
+    service = ChromeService()
+
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless")  # run in headless mode
+    options.add_argument('--disable-blink-features=AutomationControlled')
+    options.add_argument('--disable-popup-blocking')  # disable pop-up blocking
+    options.add_argument('--start-maximized')  # start the browser window in maximized mode
+    options.add_argument('--disable-extensions')  # disable extensions
+    options.add_argument('--no-sandbox')  # disable sandbox mode
+    options.add_argument('--disable-dev-shm-usage')  # disable shared memory usage
+
+    driver = webdriver.Chrome(service=service, options=options)
+    driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+
+    # TODO: rotate user agent if needed (https://www.zenrows.com/blog/selenium-stealth#scrape-with-stealth)
+
+    stealth(driver, languages=["en-US", "en"], vendor="Google Inc.", platform="Win32", webgl_vendor="Intel Inc.",
+            renderer="Intel Iris OpenGL Engine", fix_hairline=True)
+        
+    # Get soup
     try:
         logger.info(f'[{taskid}] Trying Selenium')
         driver.get(url)
