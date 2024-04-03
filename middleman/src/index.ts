@@ -20,8 +20,9 @@ interface ScrapeResult {
 const API_BASE_URL = process.env.API_BASE_URL;
 const REDIS_PORT = +process.env.REDIS_PORT || 6379;
 const EXPRESS_PORT = +process.env.EXPRESS_PORT || 3000;
+const REDIS_HOST = process.env.REDIS_HOST || '127.0.0.1';
 const client = new Redis({
-  host: '127.0.0.1',
+  host: REDIS_HOST,
   port: REDIS_PORT,
 });
 
@@ -29,74 +30,52 @@ client.on('error', (err) => {
   console.error('Redis error:', err);
 });
 
-const processUrl = async (url: string, path: string): Promise<ScrapeResult> => {
-  try {
-    const response = await axios.post<ScrapeData[]>(`${API_BASE_URL}/${path}`, { url });
-    return { url, data: response.data };
-  } catch (error) {
-    return { url, error: error.message };
-  }
-};
-
-const processUrlIfNotProcessing = async (url: string, path: string): Promise<ScrapeResult> => {
-  const isProcessing = await client.exists(url);
-  if (!isProcessing) {
-    await client.set(url, 'processing');
-    const result = await processUrl(url, path);
-    await client.del(url);
-    return result;
-  } else {
-    return { url, error: 'URL is already being processed' };
-  }
+const processUrls = (urls: string[], path: string): Promise<ScrapeResult[]> => {
+  const requests = urls.map(url => axios.post(`${API_BASE_URL}/${path}`, { url }));
+  return axios.all(requests).then(axios.spread((...responses) => {
+    return responses.map(response => ({
+      url: JSON.parse(response.config.data).url,
+      data: response.data
+    }));
+  })).catch(error => {
+    console.error('Error processing URLs:', error);
+    return [];
+  });
 };
 
 const scrapeUrls = async (urls: string[], path: string): Promise<ScrapeResult[]> => {
-  const pipeline = client.pipeline();
-
-  // Check if each URL is already being processed
-  urls.forEach((url) => {
-    pipeline.exists(url);
-  });
-
-  // Execute Redis pipeline
-  const isProcessingResults = await pipeline.exec();
-
-  // Filter URLs that are not being processed
-  const nonProcessingUrls = urls.filter((url, index) => !isProcessingResults[index][1]);
-
-  // Process non-processing URLs concurrently
-  const results = await Promise.all(nonProcessingUrls.map((url) => processUrl(url, path)));
+  const results: ScrapeResult[] = [];
+  const batchSize = 10; // Adjust batch size as needed
+  
+  for (let i = 0; i < urls.length; i += batchSize) {
+    const batchUrls = urls.slice(i, i + batchSize);
+    const batchResults = await processUrls(batchUrls, path);
+    results.push(...batchResults);
+  }
+  
   return results;
 };
 
-app.post('/scrape', async (req: Request, res: Response) => {
+const handleScrapingRequest = async (req: Request, res: Response, path: string) => {
   try {
     const urls: string[] = req.body.urls;
-
     if (!urls || !Array.isArray(urls)) {
       return res.status(400).json({ error: 'Invalid URLs array' });
     }
-
-    const results = await scrapeUrls(urls, req.path);
+    const results = await scrapeUrls(urls, path);
     res.json({ results });
   } catch (error) {
+    console.error('Error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
+};
+
+app.post('/scrape', (req: Request, res: Response) => {
+  handleScrapingRequest(req, res, req.path);
 });
 
-app.post('/scrape_soup', async (req: Request, res: Response) => {
-  try {
-    const urls: string[] = req.body.urls;
-
-    if (!urls || !Array.isArray(urls)) {
-      return res.status(400).json({ error: 'Invalid URLs array' });
-    }
-
-    const results = await scrapeUrls(urls, req.path);
-    res.json({ results });
-  } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
+app.post('/scrape_soup', (req: Request, res: Response) => {
+  handleScrapingRequest(req, res, req.path);
 });
 
 app.listen(EXPRESS_PORT, () => {

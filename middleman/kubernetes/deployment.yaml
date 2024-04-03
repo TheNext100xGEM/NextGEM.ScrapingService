@@ -5,7 +5,7 @@ metadata:
   labels:
     name: node
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: node
@@ -16,9 +16,13 @@ spec:
     spec:
       containers:
       - name: node
-        image: us-central1-docker.pkg.dev/nextgem-selenium/request-queue/middleman:v0.0.2
+        image: us-central1-docker.pkg.dev/nextgem-selenium/request-queue/middleman:v0.0.5
         ports:
         - containerPort: 3000
+        volumeMounts:
+        - name: data
+          mountPath: /data
+          readOnly: false
         resources:
           requests:
             memory: "1Gi"
@@ -27,32 +31,7 @@ spec:
             memory: "2Gi"
             cpu: "1"
       restartPolicy: Always
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: redis
-  labels:
-    app: redis
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: redis
-  template:
-    metadata:
-      labels:
-        app: redis
-    spec:
-      containers:
-      - name: redis
-        image: redis:latest
-        ports:
-        - containerPort: 6379
-        resources:
-          requests:
-            memory: "1Gi"
-            cpu: "0.5"
-          limits:
-            memory: "2Gi"
-            cpu: "1"
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: redis-data
