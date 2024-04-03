@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: worker
+  name: selenium-worker
   labels:
-    name: worker
+    name: selenium-worker
 spec:
-  replicas: 30
+  replicas: 4
   selector:
     matchLabels:
-      app: worker
+      app: selenium-worker
   template:
     metadata:
       labels:
-        app: worker
+        app: selenium-worker
     spec:
       containers:
-      - name: worker
+      - name: selenium-worker
         image: us-central1-docker.pkg.dev/nextgem-selenium/scraper/selenium-worker:v0.0.2
         ports:
         - containerPort: 5000

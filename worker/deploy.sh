@@ -6,3 +6,6 @@ docker push us-central1-docker.pkg.dev/nextgem-selenium/scraper/selenium-worker:
 
 # Deploy the worker to Cloud Run
 kubectl apply -f ./kubernetes/deployment.yaml
+
+# Restart the deployment
+kubectl rollout restart deployment selenium-worker
