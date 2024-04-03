@@ -1,7 +1,5 @@
 import uuid
-import json
 from flask import Flask, request, jsonify
-from pymongo import MongoClient
 from logging.config import dictConfig
 from scraper import get_text, get_soup
 
@@ -23,16 +21,6 @@ dictConfig({
 
 app = Flask(__name__)
 
-# Maximum number of concurrent requests
-with open('config.json', 'r') as file:
-    config = json.load(file)
-mongo_uri = config['mongo_uri']
-client = MongoClient(mongo_uri)
-db = client['nextgem']  # Database name
-settings_collection = db['settings']
-settings = settings_collection.find_one({'_id': 'scraperWorkerParallelProcesses'})
-app.logger.info(f'Worker settings used: {settings}')
-LIMIT_REQUESTS = settings['value'] # Currently not used because k8s
 
 @app.route('/scrape', methods=['POST'])
 def scrape():

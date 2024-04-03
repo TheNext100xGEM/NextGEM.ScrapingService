@@ -4,6 +4,18 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium_stealth import stealth
 from bs4 import BeautifulSoup
 import fitz  # PyMuPDF
+import json
+from pymongo import MongoClient
+
+# Timeout parameters
+with open('config.json', 'r') as file:
+    config = json.load(file)
+mongo_uri = config['mongo_uri']
+client = MongoClient(mongo_uri)
+db = client['nextgem']  # Database name
+settings_collection = db['settings']
+PAGE_LOAD_TIMEOUT = settings_collection.find_one({'_id': 'scraperPageLoadTimeout'})
+
 
 def get_soup(url: str, taskid: str, logger):
     """ Scraping with or without Selenium driver """
@@ -21,6 +33,7 @@ def get_soup(url: str, taskid: str, logger):
 
     driver = webdriver.Chrome(service=service, options=options)
     driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+    driver.set_page_load_timeout(PAGE_LOAD_TIMEOUT)
 
     # TODO: rotate user agent if needed (https://www.zenrows.com/blog/selenium-stealth#scrape-with-stealth)
 
