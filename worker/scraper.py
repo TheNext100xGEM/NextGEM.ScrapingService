@@ -14,7 +14,7 @@ mongo_uri = config['mongo_uri']
 client = MongoClient(mongo_uri)
 db = client['nextgem']  # Database name
 settings_collection = db['settings']
-PAGE_LOAD_TIMEOUT = settings_collection.find_one({'_id': 'scraperPageLoadTimeout'})
+PAGE_LOAD_TIMEOUT = settings_collection.find_one({'_id': 'scraperPageLoadTimeout'})['value']
 
 
 def get_soup(url: str, taskid: str, logger):
@@ -44,8 +44,6 @@ def get_soup(url: str, taskid: str, logger):
     try:
         logger.info(f'[{taskid}] Trying Selenium')
         driver.get(url)
-        while driver.execute_script("return document.readyState") != "complete":
-            pass
         soup = BeautifulSoup(driver.page_source, "html.parser")
         logger.info(f'[{taskid}] {url} soup length: {len(soup.text)}')
         return soup
@@ -53,7 +51,7 @@ def get_soup(url: str, taskid: str, logger):
         # Probably a timeout or bot detection
         logger.info(f'[{taskid}] Trying BS4, Selenium exception: {e}')
         try:
-            response = requests.get(url)
+            response = requests.get(url, timeout=int(PAGE_LOAD_TIMEOUT/2))
             soup = BeautifulSoup(response.text, "html.parser")
             logger.info(f'[{taskid}] {url} soup length: {len(soup.text)}')
             return soup
