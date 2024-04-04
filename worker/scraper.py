@@ -49,14 +49,14 @@ def get_soup(url: str, taskid: str, logger):
         return soup
     except Exception as e:
         # Probably a timeout or bot detection
-        logger.info(f'[{taskid}] Trying BS4, Selenium exception: {e}')
+        logger.info(f'[{taskid}] Trying simple requests, Selenium exception: {e}')
         try:
             response = requests.get(url, timeout=int(PAGE_LOAD_TIMEOUT/2))
             soup = BeautifulSoup(response.text, "html.parser")
             logger.info(f'[{taskid}] {url} soup length: {len(soup.text)}')
             return soup
         except Exception as ee:
-            logger.info(f'[{taskid}] BS4 exception: {ee}')
+            logger.info(f'[{taskid}] Exception during simple request: {ee}')
             return None
 
 
