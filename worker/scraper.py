@@ -44,6 +44,8 @@ def get_soup(url: str, taskid: str, logger):
     try:
         logger.info(f'[{taskid}] Trying Selenium')
         driver.get(url)
+        while driver.execute_script("return document.readyState") != "complete":
+            pass
         soup = BeautifulSoup(driver.page_source, "html.parser")
         logger.info(f'[{taskid}] {url} soup length: {len(soup.text)}')
         return soup
