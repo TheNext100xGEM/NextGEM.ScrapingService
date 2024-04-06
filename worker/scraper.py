@@ -60,6 +60,8 @@ def get_soup(url: str, taskid: str, logger):
         except Exception as ee:
             logger.info(f'[{taskid}] Exception during simple request: {ee}')
             return None
+    finally:
+        driver.quit()
 
 
 def soup_to_text(soup, taskid, logger):
