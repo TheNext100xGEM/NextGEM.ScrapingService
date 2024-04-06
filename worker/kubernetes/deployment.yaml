@@ -5,7 +5,7 @@ metadata:
   labels:
     name: selenium-worker
 spec:
-  replicas: 4
+  replicas: 3
   selector:
     matchLabels:
       app: selenium-worker
@@ -21,9 +21,9 @@ spec:
         - containerPort: 5000
         resources:
           requests:
-            memory: "1Gi"
-            cpu: "1"
-          limits:
             memory: "2Gi"
-            cpu: "2"
+            cpu: "3"
+          limits:
+            memory: "4Gi"
+            cpu: "3"
       restartPolicy: Always
