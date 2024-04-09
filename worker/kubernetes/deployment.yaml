@@ -2,10 +2,11 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: selenium-worker
+  namespace: selenium-worker
   labels:
     name: selenium-worker
 spec:
-  replicas: 3
+  replicas: 5
   selector:
     matchLabels:
       app: selenium-worker
@@ -22,7 +23,7 @@ spec:
         resources:
           requests:
             memory: "2Gi"
-            cpu: "3"
+            cpu: "2"
           limits:
             memory: "4Gi"
             cpu: "3"

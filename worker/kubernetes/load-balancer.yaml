@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: selenium-worker
+  namespace: selenium-worker
   labels:
     service: selenium-worker
 spec:
