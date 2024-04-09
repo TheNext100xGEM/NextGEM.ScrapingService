@@ -8,6 +8,7 @@ app.use(express.json());
 dotenv.config();
 
 const API_BASE_URL = process.env.API_BASE_URL;
+const PORT = +process.env.EXPRESS_PORT || 3000;
 const LIMIT_REQUESTS = 2;
 const domainQueues: {
   [domainName: string]: {
@@ -33,7 +34,7 @@ interface PendingRequest {
 app.post('/scrape', async (req: Request, res: Response) => {
   try {
     const urls: string[] = req.body.urls;
-
+    console.log(urls);
     if (!urls || !Array.isArray(urls)) {
       return res.status(400).json({ error: 'Invalid URLs array' });
     }
@@ -42,8 +43,11 @@ app.post('/scrape', async (req: Request, res: Response) => {
     // Send requests to scrape each URL concurrently
     await Promise.all(urls.map(async (url) => {
       try {
+        const startTime = Date.now(); // Record start time
         const response = await axios.post(`${API_BASE_URL}/scrape`, { url });
-        results.push({ url, data: response.data });
+        const endTime = Date.now(); // Record end time
+        const elapsedTime = endTime - startTime; // Calculate elapsed time
+        results.push({ url, data: response.data, responseTime: elapsedTime }); // Include response time in results
       } catch (error) {
         results.push({ url, error: error.message });
       }
@@ -67,8 +71,11 @@ app.post('/scrape_soup', async (req: Request, res: Response) => {
     // Send requests to scrape each URL concurrently
     await Promise.all(urls.map(async (url) => {
       try {
+        const startTime = Date.now(); // Record start time
         const response = await axios.post(`${API_BASE_URL}/scrape_soup`, { url });
-        results.push({ url, data: response.data });
+        const endTime = Date.now(); // Record end time
+        const elapsedTime = endTime - startTime; // Calculate elapsed time
+        results.push({ url, data: response.data, responseTime: elapsedTime }); // Include response time in results
       } catch (error) {
         results.push({ url, error: error.message });
       }
@@ -81,6 +88,6 @@ app.post('/scrape_soup', async (req: Request, res: Response) => {
 });
 
 
-app.listen(3000, () => {
-  console.log('Server running on port 3000');
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

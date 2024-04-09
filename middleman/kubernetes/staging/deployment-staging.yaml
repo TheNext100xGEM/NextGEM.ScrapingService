@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: node
+  name: node-staging
   labels:
-    name: node
+    name: node-staging
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: node
+      app: node-staging
   template:
     metadata:
       labels:
-        app: node
+        app: node-staging
     spec:
       containers:
-      - name: node
+      - name: node-staging
         image: us-central1-docker.pkg.dev/nextgem-selenium/request-queue/middleman:v0.0.6
         ports:
         - containerPort: 3000
@@ -31,7 +31,3 @@ spec:
             memory: "2Gi"
             cpu: "1"
       restartPolicy: Always
-      volumes:
-      - name: data
-        persistentVolumeClaim:
-          claimName: redis-data

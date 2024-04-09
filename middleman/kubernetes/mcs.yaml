@@ -1,0 +1,15 @@
+apiVersion: networking.gke.io/v1
+kind: MultiClusterService
+metadata:
+  name: selenium-worker-mcs
+  namespace: selenium-worker
+spec:
+  template:
+    spec:
+      selector:
+        app: selenium-worker
+      ports:
+      - name: web
+        protocol: TCP
+        port: 5000
+        targetPort: 5000

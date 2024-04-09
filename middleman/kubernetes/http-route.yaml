@@ -1,0 +1,27 @@
+kind: HTTPRoute
+apiVersion: gateway.networking.k8s.io/v1beta1
+metadata:
+  name: public-selenium-worker-route
+  namespace: selenium-worker
+  labels:
+    gateway: external-http
+spec:
+  hostnames:
+  - "selenium-worker.example.com"
+  parentRefs:
+  - name: external-http
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /central
+    backendRefs:
+      - group: net.gke.io
+        kind: ServiceImport
+        name: selenium-worker-central-1
+        port: 5000
+  - backendRefs:
+    - group: net.gke.io
+      kind: ServiceImport
+      name: selenium-worker
+      port: 5000

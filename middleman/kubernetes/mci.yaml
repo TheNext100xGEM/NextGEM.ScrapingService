@@ -1,0 +1,13 @@
+apiVersion: networking.gke.io/v1
+kind: MultiClusterIngress
+metadata:
+  name: selenium-worker-ingress
+  namespace: selenium-worker
+  annotations:
+    networking.gke.io/static-ip: 34.49.167.94
+spec:
+  template:
+    spec:
+      backend:
+        serviceName: selenium-worker-mcs
+        servicePort: 5000
