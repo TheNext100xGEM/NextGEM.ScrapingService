@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Build the docker image
-docker build --no-cache -t us-central1-docker.pkg.dev/nextgem-selenium/request-queue/middleman:v0.0.6 .
+docker build --no-cache -t us-central1-docker.pkg.dev/nextgem-selenium/request-queue/middleman:v0.0.7 .
 
 # Push the docker image to the Google Cloud Registry
-docker push us-central1-docker.pkg.dev/nextgem-selenium/request-queue/middleman:v0.0.6
+docker push us-central1-docker.pkg.dev/nextgem-selenium/request-queue/middleman:v0.0.7
 
 # Deploy the redis server
 kubectl apply -f ./kubernetes/redis.yaml

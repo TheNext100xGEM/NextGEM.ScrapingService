@@ -4,7 +4,7 @@ metadata:
   name: selenium-worker-ingress
   namespace: selenium-worker
   annotations:
-    networking.gke.io/static-ip: 34.49.167.94
+    networking.gke.io/static-ip: <your-static-ip>
 spec:
   template:
     spec:

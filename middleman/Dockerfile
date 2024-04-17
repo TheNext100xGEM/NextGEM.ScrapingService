@@ -8,6 +8,10 @@ RUN npm install
 
 COPY . .
 
+ARG NODE_ENV=prod
+
+COPY .env.${NODE_ENV} .env
+
 RUN npm run build
 
 EXPOSE 3000

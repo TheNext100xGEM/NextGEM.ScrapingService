@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: node
-  namespace: selenium-worker
+  name: staging-node
+  namespace: staging-scraper
   labels:
     name: node
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: node
+      app: staging-node
   template:
     metadata:
       labels:
-        app: node
+        app: staging-node
     spec:
       containers:
-      - name: node
-        image: us-central1-docker.pkg.dev/nextgem-selenium/request-queue/middleman:v0.0.8
+      - name: staging-node
+        image: us-docker.pkg.dev/nextgem-selenium/staging/middleman:v0.0.10
         ports:
         - containerPort: 3000
         # volumeMounts:
