@@ -1,0 +1,7 @@
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: backendconfig
+  namespace: selenium-worker
+spec:
+  timeoutSec: 40
